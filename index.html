@@ -4,71 +4,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini Multimodal Hub</title>
+    <title>Gemini Multimodal Hub | Ultra Glass</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #020617;
+        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
             color: #f8fafc;
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow-x: hidden;
             min-height: 100vh;
         }
-        #root { width: 100%; }
-        .loading-screen {
+        /* Hiệu ứng nền 3D Ambient */
+        .glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .glow-1 { top: -10%; left: -10%; background: #3b82f6; }
+        .glow-2 { bottom: -10%; right: -10%; background: #a855f7; }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .accent-gradient {
+            background: linear-gradient(135deg, #60a5fa, #a855f7, #ec4899);
+        }
+        
+        /* Loading animation */
+        .loader-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
+            height: 100vh;
         }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: #60a5fa;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .shimmer {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
     <script>
-        // Khởi tạo process ngay lập tức
         window.process = { env: { API_KEY: "" } };
-        
-        // Trình bắt lỗi toàn cục để hiển thị nếu app crash
-        window.onerror = function(msg, url, line, col, error) {
-            const root = document.getElementById('root');
-            if (root) {
-                root.innerHTML = `<div style="padding: 20px; color: #f87171; text-align: center;">
-                    <h2 style="font-size: 20px; font-bold: true;">Lỗi Khởi Chạy Ứng Dụng</h2>
-                    <p style="font-size: 14px; margin-top: 10px;">${msg}</p>
-                    <p style="font-size: 12px; opacity: 0.7;">Vui lòng kiểm tra console để biết thêm chi tiết.</p>
-                </div>`;
-            }
-            return false;
-        };
     </script>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
+    "react": "https://esm.sh/react@19.0.0",
+    "react-dom": "https://esm.sh/react-dom@19.0.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+    "@google/genai": "https://esm.sh/@google/genai@1.3.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    
     <div id="root">
-        <div class="loading-screen">
-            <div class="spinner"></div>
-            <p style="color: #94a3b8; font-size: 14px;">Đang khởi tạo hệ thống AI...</p>
+        <div class="loader-container">
+            <div class="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+            <p class="mt-4 text-slate-400 font-medium animate-pulse">Đang nạp kiến trúc AI...</p>
         </div>
     </div>
+
+    <script type="module">
+        import "./index.tsx";
+    </script>
 </body>
 </html>
