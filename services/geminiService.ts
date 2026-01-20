@@ -2,27 +2,28 @@
 import { GoogleGenAI, GenerateContentResponse, Modality, Type } from "@google/genai";
 
 export class GeminiService {
-  private ai: GoogleGenAI;
-
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+  private getAI() {
+    // Luôn lấy API_KEY mới nhất từ process.env (được inject)
+    const apiKey = (window as any).process?.env?.API_KEY || "";
+    return new GoogleGenAI({ apiKey });
   }
 
   async generateChat(prompt: string, history: { role: 'user' | 'model', parts: { text: string }[] }[]) {
-    const chat = this.ai.chats.create({
+    const ai = this.getAI();
+    const chat = ai.chats.create({
       model: 'gemini-3-pro-preview',
       config: {
         systemInstruction: "Bạn là một trợ lý ảo thông minh tên là Gemini Hub. Bạn hãy trả lời bằng tiếng Việt một cách hữu ích, lịch sự và sáng tạo.",
       }
     });
     
-    // Simple wrapper to handle history if needed in more complex scenarios
     const response = await chat.sendMessage({ message: prompt });
     return response;
   }
 
   async generateWithSearch(prompt: string) {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getAI();
+    const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
@@ -33,7 +34,8 @@ export class GeminiService {
   }
 
   async generateImage(prompt: string) {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getAI();
+    const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [{ text: prompt }],
@@ -56,7 +58,8 @@ export class GeminiService {
   }
 
   async generateSpeech(text: string) {
-    const response = await this.ai.models.generateContent({
+    const ai = this.getAI();
+    const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text: `Đọc bằng tiếng Việt một cách tự nhiên: ${text}` }] }],
       config: {
@@ -72,9 +75,8 @@ export class GeminiService {
   }
 
   async generateVideoVeo(prompt: string) {
-    // Note: This requires the user to have selected an API key previously via window.aistudio
-    const aiWithFreshKey = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    let operation = await aiWithFreshKey.models.generateVideos({
+    const ai = this.getAI();
+    let operation = await ai.models.generateVideos({
       model: 'veo-3.1-fast-generate-preview',
       prompt: prompt,
       config: {
@@ -86,11 +88,12 @@ export class GeminiService {
 
     while (!operation.done) {
       await new Promise(resolve => setTimeout(resolve, 10000));
-      operation = await aiWithFreshKey.operations.getVideosOperation({ operation: operation });
+      operation = await ai.operations.getVideosOperation({ operation: operation });
     }
 
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-    const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+    const apiKey = (window as any).process?.env?.API_KEY || "";
+    const response = await fetch(`${downloadLink}&key=${apiKey}`);
     const blob = await response.blob();
     return URL.createObjectURL(blob);
   }
