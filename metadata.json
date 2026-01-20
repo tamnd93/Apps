@@ -1,0 +1,8 @@
+{
+  "name": "Gemini Multimodal Hub",
+  "description": "Một ứng dụng trình diễn toàn diện các khả năng của Gemini API: từ xử lý văn bản, tạo hình ảnh, sản xuất video Veo đến hội thoại trực tiếp Live API.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
